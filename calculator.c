@@ -107,9 +107,8 @@ int getOperatorPriority(int Operator)
 
 void InfixtoPostfix(char *infixform, char *postfixform )  //중위표기 ->후위표기
 {
-	int q;
 	char *start = infixform;
-	char *final = postfixform;
+	char *end = postfixform;
 	OperatorStackInit(MAX);
 
 	while (*start) {
@@ -117,8 +116,8 @@ void InfixtoPostfix(char *infixform, char *postfixform )  //중위표기 ->후�
 		// postfix 에서는 operand가 연이어 나올 수 있기 때문에 공백추가 필요
 		if (isdigit(*start))
 		{
-			while (isdigit(*start) ) *final++ = *start++;
-			*final++ = ' ';
+			while (isdigit(*start) ) *end++ = *start++;
+			*end++ = ' ';
 		}
 		
 
@@ -129,7 +128,7 @@ void InfixtoPostfix(char *infixform, char *postfixform )  //중위표기 ->후�
 		{
 			while (top1 != -1 && getOperatorPriority(OperatorStack[top1]) >= getOperatorPriority(*start))
 			{
-				*final++ = OperatorStackpop();
+				*end++ = OperatorStackpop();
 			}
             //비어있지 않고, 이미 pop에 있는게 들어갈거 보다 우선순위 높으면 그렇지 않을 때 까지 pop
 
@@ -137,7 +136,7 @@ void InfixtoPostfix(char *infixform, char *postfixform )  //중위표기 ->후�
 			OperatorStackPush(*start++);
 		}
 		else
-			//  ( 괄호는 무조건 넣는다.
+			//  ( 괄호는 가장 우선순위가 높다.
 			if (*start == '(')
 			{
 				OperatorStackPush(*start++);
@@ -145,15 +144,16 @@ void InfixtoPostfix(char *infixform, char *postfixform )  //중위표기 ->후�
 
 			else if (*start == ')')
 			{
-		        // ) 괄호의 경우 (괄호가 나올때 까지 OperatorStack에 있는 모든 계산들을 다한다. 
+		        // ) 괄호의 경우 (괄호가 나올때 까지 OperatorStack에 있는 연산자를 pop한다. 
 				while(1)
 				{
-					q = OperatorStackpop();
-					if (q == '('){
+	               
+					char foo = OperatorStackpop();
+					if (foo == '('){
                     break;
                     }
 
-					*final++ = q;
+					*end++ = foo;
                     
 						
 				}
@@ -169,9 +169,9 @@ void InfixtoPostfix(char *infixform, char *postfixform )  //중위표기 ->후�
 	// 모든 계산이 끝난 후에는 스택에 남아있는 연산자들을 차례대로 꺼낸다.
 	while (top1 != -1)
 	{
-		*final++ = OperatorStackpop();
+		*end++ = OperatorStackpop();
 	}
-	*final = 0;
+	*end = 0;
 	OperatorStackfree();
 }
 
@@ -185,17 +185,17 @@ double resultfunction(const char *postfix_array)
 	OperandStackInit(MAX);
 	while (*pfa_p) {
 
-		// 스택에 숫자를 넣어서 계산을 한다. 이때 숫자를 구분하여 스택에 넣자.
+		
 		if (isdigit(*pfa_p)) {
 			result = atof(pfa_p);
             //double atof(const char* _String);
-            //문자열(char*)을 실수(double)로 변환하기 위해 사용됩니다.
+            //문자열(char*)을 실수(double)로 변환하기 위해 사용된다.
 
 			OperandStackPush(result);
             if(isdigit(*pfa_p)){pfa_p++;}
 		}
 		else {
-			// 연산자가 나올 시 위의 두 부분을 계산한다.
+			// 연산자가 나올 시 위의 두 operand을 계산한다.
 			if (strchr("^*/+-", *pfa_p)) {
 				operand2 = OperandStackpop();
 				operand1 = OperandStackpop();
@@ -228,8 +228,8 @@ double resultfunction(const char *postfix_array)
 				}
 			}
 			
-			//printf("%s\n", pfa_p); //스택에 쌓여있는거 출력
-			// 뒤로 이동, 연산자 안나오면
+			
+			// 연산자 안나오면 이동
 			pfa_p++;
 		}
 	}
@@ -250,8 +250,8 @@ int main(void) {
 	while(1)
 	{
 
-		printf("식을 입력하세요 : ");
-		gets(infixform);
+		printf("Please enter a formula : ");
+        scanf("%s", &infixform);
 
 		printf("Input expression(infixform): %s", infixform);
 		printf("\n");
